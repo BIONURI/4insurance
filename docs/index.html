@@ -138,9 +138,27 @@
             position: relative;
             width: 100%;
         }
-        /* 추가: 결과 영역이 표시될 때 아래 콘텐츠 밀기 효과를 위한 스타일 */
+        /* 추가: 결과 영역이 표시될 때 부드럽게 확장되는 효과 */
+        .result {
+            height: auto;
+            overflow: hidden;
+            max-height: 0;
+            margin-top: 20px;
+            border: 2px solid #28a745;
+            border-radius: 5px;
+            padding: 0;
+            background-color: white;
+            transition: max-height 0.5s ease-in-out;
+            display: block;
+        }
+        
+        .result.show {
+            max-height: 2000px; /* 충분히 큰 값으로 설정 */
+        }
+        
+        /* 화면 전체가 확장되도록 조정 */
         .additional-content {
-            transition: margin-top 0.3s ease;
+            transition: margin-top 0.5s ease-in-out;
         }
     </style>
 </head>
@@ -158,7 +176,7 @@
                     
                     <div id="result" class="result">
                         <div class="result-header">보험료 계산 결과</div>
-                        <div class="result-content">
+                        <div class="result-content" id="result-content">
                             <table>
                                 <thead>
                                     <tr>
@@ -207,11 +225,9 @@
                 </div>
             </div>
             
-            <!-- 여기에 아래 콘텐츠가 있다고 가정 -->
+            <!-- 추가 콘텐츠를 위한 공간 -->
             <div class="additional-content">
-                <h3>종합소득세는 누구에게 해당되나요?</h3>
-                <p>근로소득 외에 사업소득, 이자소득, 배당소득, 연금소득, 기타소득이 있는 개인은...</p>
-                <!-- 기타 추가 콘텐츠 -->
+                <!-- 여기에 필요한 경우 추가 콘텐츠가 들어갈 수 있음 -->
             </div>
         </div>
     </div>
@@ -298,18 +314,21 @@
                 document.getElementById('total-employee').textContent = formatNumber(totalEmployee) + '원';
                 document.getElementById('total-employer').textContent = formatNumber(totalEmployer) + '원';
                 
-                // 결과 화면 표시
-                resultDiv.style.display = 'block';
+                // 결과 화면 표시 (애니메이션 적용)
+                resultDiv.classList.add('show');
                 
-                // 추가: 결과 영역 높이 계산하여 아래 콘텐츠의 위치 조정
+                // 결과 표시 후 아래 콘텐츠 위치 조정
                 setTimeout(function() {
                     // 결과 영역 높이 가져오기
                     const resultHeight = resultDiv.offsetHeight;
                     
-                    // 아래 콘텐츠가 결과 영역만큼 밀리도록 처리
-                    // (결과가 이미 표시되고 있으므로 margin-top을 기존 값 + 결과 높이로 설정하지 않음)
+                    // 결과 영역이 자연스럽게 확장되고, 아래 콘텐츠가 밀리도록 설정
+                    const additionalContent = document.querySelector('.additional-content');
+                    if (additionalContent) {
+                        additionalContent.style.marginTop = resultHeight + 'px';
+                    }
                     
-                    // 결과 영역으로 스크롤 처리
+                    // 결과 영역을 화면에 표시하도록 스크롤
                     window.scrollTo({
                         top: resultDiv.offsetTop - 20,
                         behavior: 'smooth'
@@ -372,39 +391,41 @@
                 return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             }
             
-            // 결과 표시 상태 업데이트 함수 (결과 영역이 표시되거나 숨겨질 때 호출)
+            // 결과 영역이 변경될 때 추가 콘텐츠 위치 조정
             function updateResultVisibility() {
-                // 결과 영역의 현재 표시 상태 확인
-                const isResultVisible = resultDiv.style.display === 'block';
+                // 결과 영역이 show 클래스를 가지고 있는지 확인
+                const isResultVisible = resultDiv.classList.contains('show');
                 
                 if (isResultVisible) {
-                    // 결과 영역이 보이면 아래 콘텐츠가 밀리도록 margin 설정
+                    // 결과 영역이 표시되면 아래 콘텐츠가 밀리도록 margin 설정
                     const resultHeight = resultDiv.offsetHeight;
-                    // additionalContent.style.marginTop = resultHeight + 'px';
+                    if (additionalContent) {
+                        additionalContent.style.marginTop = resultHeight + 'px';
+                    }
                 } else {
                     // 결과 영역이 숨겨지면 아래 콘텐츠 margin 원래대로
-                    // additionalContent.style.marginTop = '0';
+                    if (additionalContent) {
+                        additionalContent.style.marginTop = '0';
+                    }
                 }
             }
             
-            // 초기 로드 시 한 번 호출하여 초기 상태 설정
-            updateResultVisibility();
-            
             // 윈도우 리사이즈 시 결과 영역 표시 상태 업데이트
-            window.addEventListener('resize', updateResultVisibility);
+            window.addEventListener('resize', function() {
+                if (resultDiv.classList.contains('show')) {
+                    setTimeout(updateResultVisibility, 50);
+                }
+            });
             
-            // 결과 영역 변화를 감지하기 위한 MutationObserver 설정
+            // 결과 영역에 대한 변화 감지를 위한 MutationObserver 설정
             const observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-                    if (mutation.attributeName === 'style' && 
-                        mutation.target === resultDiv) {
-                        updateResultVisibility();
-                    }
+                mutations.forEach(function() {
+                    setTimeout(updateResultVisibility, 50);
                 });
             });
             
-            // 결과 영역의 스타일 변화 감시 시작
-            observer.observe(resultDiv, { attributes: true });
+            // 결과 영역의 클래스 변화 감시 시작
+            observer.observe(resultDiv, { attributes: true, attributeFilter: ['class'] });
         });
     </script>
 </body>
