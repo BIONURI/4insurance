@@ -141,51 +141,7 @@
                     <input type="text" id="monthlySalary" placeholder="예: 3000000">
                 </div>
                 <button id="calculate-btn">계산하기</button>
-                
-                <div id="result" class="result">
-                    <div class="result-header">보험료 계산 결과</div>
-                    <div class="result-content">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>보험 항목</th>
-                                    <th>직원 부담</th>
-                                    <th>사업주 부담</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="insurance-type">국민연금</td>
-                                    <td class="amount" id="nationalPension-employee"></td>
-                                    <td class="amount" id="nationalPension-employer"></td>
-                                </tr>
-                                <tr>
-                                    <td class="insurance-type">건강보험</td>
-                                    <td class="amount" id="healthInsurance-employee"></td>
-                                    <td class="amount" id="healthInsurance-employer"></td>
-                                </tr>
-                                <tr>
-                                    <td class="insurance-type">고용보험</td>
-                                    <td class="amount" id="employmentInsurance-employee"></td>
-                                    <td class="amount" id="employmentInsurance-employer"></td>
-                                </tr>
-                                <tr>
-                                    <td class="insurance-type">산재보험</td>
-                                    <td class="amount" id="industrialAccidentInsurance-employee"></td>
-                                    <td class="amount" id="industrialAccidentInsurance-employer"></td>
-                                </tr>
-                                <tr class="total-row">
-                                    <td class="insurance-type">총 부담</td>
-                                    <td class="amount" id="total-employee"></td>
-                                    <td class="amount" id="total-employer"></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        
-                        <div class="note">
-                            * 이 계산기는 모의계산이므로 실제와 일부 차이가 있을 수 있습니다.<br>
-                            산재보험의 경우 업종에 따라 요율에 차이가 있으므로, 업종 평균 약 1.47%를 기준으로 계산되었습니다.
-                        </div>
+               
                         
                         <button class="download-btn" id="download-btn">이미지로 다운로드</button>
                     </div>
@@ -236,6 +192,51 @@
                         employee: Math.round(nationalPensionTotal / 2),
                         employer: Math.round(nationalPensionTotal / 2)
                     },
+                     
+                <div id="result" class="result">
+                    <div class="result-header">보험료 계산 결과</div>
+                    <div class="result-content">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>보험 항목</th>
+                                    <th>직원 부담</th>
+                                    <th>사업주 부담</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="insurance-type">국민연금</td>
+                                    <td class="amount" id="nationalPension-employee"></td>
+                                    <td class="amount" id="nationalPension-employer"></td>
+                                </tr>
+                                <tr>
+                                    <td class="insurance-type">건강보험</td>
+                                    <td class="amount" id="healthInsurance-employee"></td>
+                                    <td class="amount" id="healthInsurance-employer"></td>
+                                </tr>
+                                <tr>
+                                    <td class="insurance-type">고용보험</td>
+                                    <td class="amount" id="employmentInsurance-employee"></td>
+                                    <td class="amount" id="employmentInsurance-employer"></td>
+                                </tr>
+                                <tr>
+                                    <td class="insurance-type">산재보험</td>
+                                    <td class="amount" id="industrialAccidentInsurance-employee"></td>
+                                    <td class="amount" id="industrialAccidentInsurance-employer"></td>
+                                </tr>
+                                <tr class="total-row">
+                                    <td class="insurance-type">총 부담</td>
+                                    <td class="amount" id="total-employee"></td>
+                                    <td class="amount" id="total-employer"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div class="note">
+                            * 이 계산기는 모의계산이므로 실제와 일부 차이가 있을 수 있습니다.<br>
+                            산재보험의 경우 업종에 따라 요율에 차이가 있으므로, 업종 평균 약 1.47%를 기준으로 계산되었습니다.
+                        </div>
                     healthInsurance: {
                         employee: Math.round(healthInsuranceTotal / 2),
                         employer: Math.round(healthInsuranceTotal / 2)
