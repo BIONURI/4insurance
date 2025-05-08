@@ -156,9 +156,32 @@
             max-height: 2000px; /* 충분히 큰 값으로 설정 */
         }
         
-        /* 화면 전체가 확장되도록 조정 */
+        /* Q&A 스타일 추가 */
+        .qa-section {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, margin-top 0.3s ease;
+        }
+        
+        .qa-question {
+            color: #333;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .qa-answer {
+            color: #555;
+            margin-bottom: 0;
+        }
+        
+        /* 추가 콘텐츠 스타일 (이 부분이 결과에 따라 밀림) */
         .additional-content {
-            transition: margin-top 0.5s ease-in-out;
+            transition: margin-top 0.3s ease;
         }
     </style>
 </head>
@@ -225,10 +248,8 @@
                 </div>
             </div>
             
-            <!-- 추가 콘텐츠를 위한 공간 -->
-            <div class="additional-content">
-                <!-- 여기에 필요한 경우 추가 콘텐츠가 들어갈 수 있음 -->
-            </div>
+            <!-- 여기에 페이지 추가 콘텐츠를 위한 공간 -->
+            <div class="additional-content"></div>
         </div>
     </div>
 
@@ -314,21 +335,21 @@
                 document.getElementById('total-employee').textContent = formatNumber(totalEmployee) + '원';
                 document.getElementById('total-employer').textContent = formatNumber(totalEmployer) + '원';
                 
-                // 결과 화면 표시 (애니메이션 적용)
-                resultDiv.classList.add('show');
+                // 결과 화면 표시
+                resultDiv.style.display = 'block';
                 
-                // 결과 표시 후 아래 콘텐츠 위치 조정
+                // 아래 콘텐츠 위치 조정 및 스크롤 처리
                 setTimeout(function() {
                     // 결과 영역 높이 가져오기
                     const resultHeight = resultDiv.offsetHeight;
                     
-                    // 결과 영역이 자연스럽게 확장되고, 아래 콘텐츠가 밀리도록 설정
+                    // 아래 콘텐츠가 결과 영역만큼 밀리도록 처리
                     const additionalContent = document.querySelector('.additional-content');
                     if (additionalContent) {
                         additionalContent.style.marginTop = resultHeight + 'px';
                     }
                     
-                    // 결과 영역을 화면에 표시하도록 스크롤
+                    // 결과 영역으로 스크롤 처리
                     window.scrollTo({
                         top: resultDiv.offsetTop - 20,
                         behavior: 'smooth'
@@ -393,8 +414,8 @@
             
             // 결과 영역이 변경될 때 추가 콘텐츠 위치 조정
             function updateResultVisibility() {
-                // 결과 영역이 show 클래스를 가지고 있는지 확인
-                const isResultVisible = resultDiv.classList.contains('show');
+                // 결과 영역의 표시 상태 확인
+                const isResultVisible = resultDiv.style.display === 'block';
                 
                 if (isResultVisible) {
                     // 결과 영역이 표시되면 아래 콘텐츠가 밀리도록 margin 설정
@@ -412,20 +433,22 @@
             
             // 윈도우 리사이즈 시 결과 영역 표시 상태 업데이트
             window.addEventListener('resize', function() {
-                if (resultDiv.classList.contains('show')) {
+                if (resultDiv.style.display === 'block') {
                     setTimeout(updateResultVisibility, 50);
                 }
             });
             
             // 결과 영역에 대한 변화 감지를 위한 MutationObserver 설정
             const observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function() {
-                    setTimeout(updateResultVisibility, 50);
+                mutations.forEach(function(mutation) {
+                    if (mutation.attributeName === 'style') {
+                        setTimeout(updateResultVisibility, 50);
+                    }
                 });
             });
             
-            // 결과 영역의 클래스 변화 감시 시작
-            observer.observe(resultDiv, { attributes: true, attributeFilter: ['class'] });
+            // 결과 영역의 스타일 변화 감시 시작
+            observer.observe(resultDiv, { attributes: true, attributeFilter: ['style'] });
         });
     </script>
 </body>
