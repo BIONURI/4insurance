@@ -7,28 +7,23 @@
     <!-- html2canvas 라이브러리 추가 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            height: auto;
-            overflow: hidden;
-            background-color: transparent;
-        }
         body {
             font-family: 'Noto Sans KR', sans-serif;
             line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: transparent;
             color: #333;
         }
         .container {
             width: 100%;
-            max-width: 800px;
-            margin: 0 auto;
+            max-width: 100%;
+            margin: 0;
             padding: 0;
         }
         .calculator {
             border: 1px solid #0066cc;
             border-radius: 5px;
-            overflow: hidden;
             background-color: white;
         }
         .header {
@@ -141,7 +136,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="calculator" id="calculator">
+        <div class="calculator">
             <div class="header">4대 보험 계산기 v.2025</div>
             <div class="content">
                 <div class="form-group">
@@ -217,39 +212,11 @@
             const calculateBtn = document.getElementById('calculate-btn');
             const resultDiv = document.getElementById('result');
             const downloadBtn = document.getElementById('download-btn');
-            const calculator = document.getElementById('calculator');
             
             // 입력값이 숫자만 허용되도록 설정
             monthlySalaryInput.addEventListener('input', function() {
                 this.value = this.value.replace(/[^0-9]/g, '');
             });
-            
-            // 티스토리용 높이 조정 함수
-            function adjustHeight() {
-                // 전체 높이 계산
-                const totalHeight = calculator.offsetHeight;
-                
-                try {
-                    // 1. postMessage 방식으로 부모에게 높이 전달
-                    if (window.parent && window.parent !== window) {
-                        window.parent.postMessage({
-                            type: 'set-iframe-height',
-                            height: totalHeight
-                        }, '*');
-                    }
-                    
-                    // 2. 직접 티스토리 부모 iframe 높이 설정 시도
-                    if (window.frameElement) {
-                        window.frameElement.style.height = totalHeight + 'px';
-                    }
-                    
-                    // 3. document 높이 설정 (마지막 대안)
-                    document.documentElement.style.height = totalHeight + 'px';
-                    document.body.style.height = totalHeight + 'px';
-                } catch (err) {
-                    console.log('높이 조정 중 오류:', err);
-                }
-            }
             
             // 계산 버튼 클릭 이벤트
             calculateBtn.addEventListener('click', function() {
@@ -313,9 +280,6 @@
                 
                 // 결과 표시
                 resultDiv.style.display = 'block';
-                
-                // 높이 조정 (결과가 표시된 후 약간의 지연)
-                setTimeout(adjustHeight, 100);
             });
             
             // 다운로드 버튼 클릭 이벤트 - html2canvas 이용
@@ -372,33 +336,7 @@
             function formatNumber(num) {
                 return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             }
-            
-            // 윈도우 리사이즈 이벤트
-            window.addEventListener('resize', function() {
-                setTimeout(adjustHeight, 100);
-            });
-            
-            // 초기 높이 설정
-            setTimeout(adjustHeight, 100);
         });
-    </script>
-    
-    <!-- 티스토리 블로그에 아래 코드 추가 (iframe 내에 필요) -->
-    <script>
-    window.addEventListener('message', function(e) {
-        if (e.data && e.data.type === 'set-iframe-height') {
-            try {
-                var iframes = document.getElementsByTagName('iframe');
-                for (var i = 0; i < iframes.length; i++) {
-                    if (iframes[i].contentWindow === e.source) {
-                        iframes[i].style.height = (e.data.height + 20) + 'px'; // 여유분 20px 추가
-                    }
-                }
-            } catch (err) {
-                console.error('iframe 높이 조정 오류:', err);
-            }
-        }
-    }, false);
     </script>
 </body>
 </html>
