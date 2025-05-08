@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en" >
+<<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4대 보험 계산기 v.2025</title>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .calculator {
+            border: 1px solid #0066cc;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .header {
+            background-color: #0066cc;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .content {
+            padding: 20px;
+            background-color: white;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0055aa;
+        }
+        .result {
+            margin-top: 20px;
+            border: 2px solid #28a745;
+            border-radius: 5px;
+            padding: 0;
+            background-color: white;
+            display: none;
+        }
+        .result-header {
+            background-color: #28a745;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .result-content {
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .insurance-type {
+            text-align: left;
+            font-weight: bold;
+        }
+        .amount {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .total-row {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .note {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .download-btn {
+            display: block;
+            width: 200px;
+            margin: 15px auto 0;
+            text-align: center;
+            padding: 8px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .download-btn:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="calculator">
+            <div class="header">4대 보험 계산기 v.2025</div>
+            <div class="content">
+                <div class="form-group">
+                    <label for="monthlySalary">월 기본급(원)을 아래에 입력하세요!</label>
+                    <input type="text" id="monthlySalary" placeholder="예: 3000000">
+                </div>
+                <button id="calculate-btn">계산하기</button>
+                
+                <div id="result" class="result">
+                    <div class="result-header">보험료 계산 결과</div>
+                    <div class="result-content">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>보험 항목</th>
+                                    <th>직원 부담</th>
+                                    <th>사업주 부담</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="insurance-type">국민연금</td>
+                                    <td class="amount" id="nationalPension-employee"></td>
+                                    <td class="amount" id="nationalPension-employer"></td>
+                                </tr>
+                                <tr>
+                                    <td class="insurance-type">건강보험</td>
+                                    <td class="amount" id="healthInsurance-employee"></td>
+                                    <td class="amount" id="healthInsurance-employer"></td>
+                                </tr>
+                                <tr>
+                                    <td class="insurance-type">고용보험</td>
+                                    <td class="amount" id="employmentInsurance-employee"></td>
+                                    <td class="amount" id="employmentInsurance-employer"></td>
+                                </tr>
+                                <tr>
+                                    <td class="insurance-type">산재보험</td>
+                                    <td class="amount" id="industrialAccidentInsurance-employee"></td>
+                                    <td class="amount" id="industrialAccidentInsurance-employer"></td>
+                                </tr>
+                                <tr class="total-row">
+                                    <td class="insurance-type">총 부담</td>
+                                    <td class="amount" id="total-employee"></td>
+                                    <td class="amount" id="total-employer"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div class="note">
+                            * 이 계산기는 모의계산이므로 실제와 일부 차이가 있을 수 있습니다.<br>
+                            산재보험의 경우 업종에 따라 요율에 차이가 있으므로, 업종 평균 약 1.47%를 기준으로 계산되었습니다.
+                        </div>
+                        
+                        <button class="download-btn" id="download-btn">이미지로 다운로드</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 보험료율 설정 (2025년 기준)
+            const rates = {
+                nationalPension: 0.09,       // 9% (각 4.5%)
+                healthInsurance: 0.0709,     // 7.09% (각 3.545%)
+                employmentInsurance: 0.018,  // 1.8% (각 0.9%)
+                industrialAccidentInsurance: 0.0147  // 1.47% (사업주만)
+            };
+            
+            // DOM 요소
+            const monthlySalaryInput = document.getElementById('monthlySalary');
+            const calculateBtn = document.getElementById('calculate-btn');
+            const resultDiv = document.getElementById('result');
+            const downloadBtn = document.getElementById('download-btn');
+            
+            // 입력값이 숫자만 허용되도록 설정
+            monthlySalaryInput.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+            
+            // 계산 버튼 클릭 이벤트
+            calculateBtn.addEventListener('click', function() {
+                const monthlySalary = parseInt(monthlySalaryInput.value);
+                
+                if (!monthlySalary) {
+                    alert('월 기본급을 입력해주세요.');
+                    return;
+                }
+                
+                // 각 보험별 계산
+                const nationalPensionTotal = monthlySalary * rates.nationalPension;
+                const healthInsuranceTotal = monthlySalary * rates.healthInsurance;
+                const employmentInsuranceTotal = monthlySalary * rates.employmentInsurance;
+                const industrialAccidentInsuranceTotal = monthlySalary * rates.industrialAccidentInsurance;
+                
+                // 직원/사업주 부담 분할
+                const results = {
+                    nationalPension: {
+                        employee: Math.round(nationalPensionTotal / 2),
+                        employer: Math.round(nationalPensionTotal / 2)
+                    },
+                    healthInsurance: {
+                        employee: Math.round(healthInsuranceTotal / 2),
+                        employer: Math.round(healthInsuranceTotal / 2)
+                    },
+                    employmentInsurance: {
+                        employee: Math.round(employmentInsuranceTotal / 2),
+                        employer: Math.round(employmentInsuranceTotal / 2)
+                    },
+                    industrialAccidentInsurance: {
+                        employee: 0,
+                        employer: Math.round(industrialAccidentInsuranceTotal)
+                    }
+                };
+                
+                // 총 부담액 계산
+                const totalEmployee = results.nationalPension.employee + 
+                                      results.healthInsurance.employee + 
+                                      results.employmentInsurance.employee;
+                const totalEmployer = results.nationalPension.employer + 
+                                      results.healthInsurance.employer + 
+                                      results.employmentInsurance.employer + 
+                                      results.industrialAccidentInsurance.employer;
+                
+                // 결과 표시
+                document.getElementById('nationalPension-employee').textContent = formatNumber(results.nationalPension.employee) + '원';
+                document.getElementById('nationalPension-employer').textContent = formatNumber(results.nationalPension.employer) + '원';
+                
+                document.getElementById('healthInsurance-employee').textContent = formatNumber(results.healthInsurance.employee) + '원';
+                document.getElementById('healthInsurance-employer').textContent = formatNumber(results.healthInsurance.employer) + '원';
+                
+                document.getElementById('employmentInsurance-employee').textContent = formatNumber(results.employmentInsurance.employee) + '원';
+                document.getElementById('employmentInsurance-employer').textContent = formatNumber(results.employmentInsurance.employer) + '원';
+                
+                document.getElementById('industrialAccidentInsurance-employee').textContent = formatNumber(results.industrialAccidentInsurance.employee) + '원';
+                document.getElementById('industrialAccidentInsurance-employer').textContent = formatNumber(results.industrialAccidentInsurance.employer) + '원';
+                
+                document.getElementById('total-employee').textContent = formatNumber(totalEmployee) + '원';
+                document.getElementById('total-employer').textContent = formatNumber(totalEmployer) + '원';
+                
+                // 결과 화면 표시
+                resultDiv.style.display = 'block';
+            });
+            
+            // 다운로드 버튼 클릭 이벤트
+            downloadBtn.addEventListener('click', function() {
+                alert('이미지 다운로드 기능은 html2canvas 라이브러리가 필요합니다. 현재 데모에서는 기능이 제한됩니다.');
+                // 실제 구현 시 html2canvas 라이브러리를 사용하여 결과 영역을 이미지로 저장
+            });
+            
+            // 숫자 포맷 함수 (콤마 추가)
+            function formatNumber(num) {
+                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+        });
+    </script>
+</body>
+</html>
+
