@@ -138,6 +138,10 @@
             position: relative;
             width: 100%;
         }
+        /* 추가: 결과 영역이 표시될 때 아래 콘텐츠 밀기 효과를 위한 스타일 */
+        .additional-content {
+            transition: margin-top 0.3s ease;
+        }
     </style>
 </head>
 <body>
@@ -227,6 +231,7 @@
             const calculateBtn = document.getElementById('calculate-btn');
             const resultDiv = document.getElementById('result');
             const downloadBtn = document.getElementById('download-btn');
+            const additionalContent = document.querySelector('.additional-content');
             
             // 입력값이 숫자만 허용되도록 설정
             monthlySalaryInput.addEventListener('input', function() {
@@ -293,11 +298,18 @@
                 document.getElementById('total-employee').textContent = formatNumber(totalEmployee) + '원';
                 document.getElementById('total-employer').textContent = formatNumber(totalEmployer) + '원';
                 
-                // 결과 화면 표시 및 스크롤 처리
+                // 결과 화면 표시
                 resultDiv.style.display = 'block';
                 
-                // 화면 높이 자동 조정 (결과가 표시될 때 페이지 레이아웃 재계산)
+                // 추가: 결과 영역 높이 계산하여 아래 콘텐츠의 위치 조정
                 setTimeout(function() {
+                    // 결과 영역 높이 가져오기
+                    const resultHeight = resultDiv.offsetHeight;
+                    
+                    // 아래 콘텐츠가 결과 영역만큼 밀리도록 처리
+                    // (결과가 이미 표시되고 있으므로 margin-top을 기존 값 + 결과 높이로 설정하지 않음)
+                    
+                    // 결과 영역으로 스크롤 처리
                     window.scrollTo({
                         top: resultDiv.offsetTop - 20,
                         behavior: 'smooth'
@@ -307,12 +319,21 @@
             
             // 다운로드 버튼 클릭 이벤트 - html2canvas 이용
             downloadBtn.addEventListener('click', function() {
-                if (typeof html2canvas !== 'undefined') {
-                    // 결과 영역 캡처
-                    html2canvas(resultDiv, {
+                try {
+                    // 결과 영역 캡처 준비
+                    const resultElement = document.getElementById('result');
+                    
+                    // 다운로드 진행중 메시지
+                    downloadBtn.textContent = '다운로드 중...';
+                    downloadBtn.disabled = true;
+                    
+                    // html2canvas로 결과 영역 캡처
+                    html2canvas(resultElement, {
                         backgroundColor: '#ffffff',
                         scale: 2, // 고해상도로 캡처
-                        logging: false
+                        logging: false,
+                        useCORS: true, // CORS 문제 해결을 위해 추가
+                        allowTaint: true // 외부 이미지 허용
                     }).then(function(canvas) {
                         // 캡처된 이미지를 데이터 URL로 변환
                         const imageData = canvas.toDataURL('image/png');
@@ -320,14 +341,29 @@
                         // 다운로드 링크 생성
                         const link = document.createElement('a');
                         link.href = imageData;
-                        link.download = '4대보험_계산결과.png';
+                        link.download = '4대보험_계산결과_' + new Date().getTime() + '.png';
+                        
+                        // 다운로드 링크 클릭 (파일 다운로드 실행)
+                        document.body.appendChild(link);
                         link.click();
+                        document.body.removeChild(link);
+                        
+                        // 버튼 원래 상태로 복원
+                        downloadBtn.textContent = '이미지로 다운로드';
+                        downloadBtn.disabled = false;
                     }).catch(function(error) {
                         console.error('이미지 캡처 실패:', error);
                         alert('이미지 다운로드에 실패했습니다. 다시 시도해 주세요.');
+                        // 버튼 원래 상태로 복원
+                        downloadBtn.textContent = '이미지로 다운로드';
+                        downloadBtn.disabled = false;
                     });
-                } else {
-                    alert('이미지 다운로드 기능을 위한 라이브러리가 로드되지 않았습니다.');
+                } catch (e) {
+                    console.error('다운로드 처리 오류:', e);
+                    alert('이미지 다운로드 처리 중 오류가 발생했습니다.');
+                    // 버튼 원래 상태로 복원
+                    downloadBtn.textContent = '이미지로 다운로드';
+                    downloadBtn.disabled = false;
                 }
             });
             
@@ -335,6 +371,40 @@
             function formatNumber(num) {
                 return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             }
+            
+            // 결과 표시 상태 업데이트 함수 (결과 영역이 표시되거나 숨겨질 때 호출)
+            function updateResultVisibility() {
+                // 결과 영역의 현재 표시 상태 확인
+                const isResultVisible = resultDiv.style.display === 'block';
+                
+                if (isResultVisible) {
+                    // 결과 영역이 보이면 아래 콘텐츠가 밀리도록 margin 설정
+                    const resultHeight = resultDiv.offsetHeight;
+                    // additionalContent.style.marginTop = resultHeight + 'px';
+                } else {
+                    // 결과 영역이 숨겨지면 아래 콘텐츠 margin 원래대로
+                    // additionalContent.style.marginTop = '0';
+                }
+            }
+            
+            // 초기 로드 시 한 번 호출하여 초기 상태 설정
+            updateResultVisibility();
+            
+            // 윈도우 리사이즈 시 결과 영역 표시 상태 업데이트
+            window.addEventListener('resize', updateResultVisibility);
+            
+            // 결과 영역 변화를 감지하기 위한 MutationObserver 설정
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.attributeName === 'style' && 
+                        mutation.target === resultDiv) {
+                        updateResultVisibility();
+                    }
+                });
+            });
+            
+            // 결과 영역의 스타일 변화 감시 시작
+            observer.observe(resultDiv, { attributes: true });
         });
     </script>
 </body>
